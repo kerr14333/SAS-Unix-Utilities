@@ -1,0 +1,36 @@
+#!/bin/bash
+#This program otuputs the contents of a SAS dataset 
+
+#Check to see if there is the correct number
+#of Arguments. If not exit program
+if [ $# -ne 1 ]
+then
+    echo "Incorrect number of parameters. Exiting ..."
+    exit 1
+fi
+
+#The first argument is the dataset
+file=$1
+
+
+##Check if File exists
+if [ -f $file ]; then 
+    #Make sure its a SAS File
+    if [ ${file##*.} != 'sas7bdat' ]; then
+        echo " ERROR: '$file' is not a SAS File "
+        exit 1
+    fi
+    inputFile=${file%.*}
+    sasDS=${inputFile##*/}
+    lib=$(dirname "${file}")
+else
+    #If file does not exist exit program
+    echo "ERROR: File '$file' does not exist"
+    exit 1
+fi
+
+sasinit="%let DS=$sasDS; %let lib=$lib;"
+
+#finally after so much work we can actually execute SAS
+sas -stdio -nolog -initstmt "$sasinit" /home/grievesc/sasmacros/pc.sas 
+echo "Ending processing with exit status $?" 
